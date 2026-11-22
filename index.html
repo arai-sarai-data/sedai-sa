@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>世代差データベース｜公的統計でみる「世代でこんなに違う」</title>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://arai-sarai-data.github.io/sedai-sa/">
+<meta property="og:title" content="世代差データベース｜公的統計でみる「世代でこんなに違う」">
+<meta name="description" content="総務省・厚労省・内閣府などの年代別統計を集め、「いちばん高い世代と低い世代の差」が大きい順にランキング。">
+<meta property="og:description" content="総務省・厚労省・内閣府などの年代別統計を集め、「いちばん高い世代と低い世代の差」が大きい順にランキング。">
+<meta name="twitter:card" content="summary">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f5f1; --panel:#ffffff; --ink:#1d1d1b; --sub:#5f5e58; --line:#e3e1da;
+  --accent:#d1495b; --accent2:#2e86ab; --soft:#f0eee8;
+  --g10:#7b5ea7; --g20:#2e86ab; --g30:#3a9d7a; --g40:#9bb53a; --g50:#e0a526; --g60:#e07a26; --g70:#d1495b;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#161614;--panel:#20201d;--ink:#ecebe6;--sub:#a5a39b;--line:#34332f;--soft:#2a2a26}
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans JP",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+a{color:var(--accent2)}
+header{padding:40px 20px 24px;max-width:1180px;margin:0 auto}
+.kicker{font-size:13px;letter-spacing:.12em;color:var(--accent);font-weight:700}
+h1{font-size:clamp(26px,4vw,40px);font-weight:900;margin:6px 0 10px;line-height:1.25}
+.lead{color:var(--sub);max-width:760px;margin:0}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin-top:20px}
+.stats div b{display:block;font-size:26px;font-weight:900}
+.stats div span{font-size:12px;color:var(--sub)}
+nav.tabs{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;gap:6px;border-bottom:1px solid var(--line)}
+nav.tabs button{border:0;background:none;padding:12px 16px;font:inherit;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+nav.tabs button.on{color:var(--ink);border-color:var(--accent)}
+main{max-width:1180px;margin:0 auto;padding:22px 20px 60px}
+.view{display:none}.view.on{display:block}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.toolbar input,.toolbar select{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.toolbar input{flex:1;min-width:200px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:5px 12px;border-radius:999px;font:inherit;font-size:13px;cursor:pointer}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.layout{display:grid;grid-template-columns:340px 1fr;gap:18px;align-items:start}
+@media(max-width:860px){.layout{grid-template-columns:1fr}}
+.layout>*{min-width:0}
+.list{display:flex;flex-direction:column;gap:8px;max-height:78vh;overflow:auto;padding-right:4px}
+.item{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.item.on{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 25%,transparent)}
+.item .t{font-weight:700;font-size:14px}
+.item .m{font-size:12px;color:var(--sub);display:flex;justify-content:space-between;gap:8px;margin-top:2px}
+.gapbar{height:4px;background:var(--soft);border-radius:2px;margin-top:6px;overflow:hidden}
+.gapbar i{display:block;height:100%;background:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card h2{margin:4px 0 4px;font-size:22px;line-height:1.35}
+.cat{font-size:12px;font-weight:700;color:var(--accent2)}
+.verdict{background:var(--soft);border-radius:10px;padding:12px 14px;margin:14px 0;font-size:15px}
+.verdict b{color:var(--accent)}
+svg text{fill:var(--ink);font-family:"Noto Sans JP",sans-serif}
+svg .axis{stroke:var(--line)}
+svg .sub{fill:var(--sub)}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:10px}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+.tablewrap{overflow-x:auto}
+.src{font-size:12.5px;color:var(--sub);margin-top:14px;border-top:1px dashed var(--line);padding-top:10px}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--c);margin-right:5px;vertical-align:-1px}
+.gens{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:18px}
+@media(max-width:700px){.gens{grid-template-columns:repeat(4,1fr)}}
+.gen{border:2px solid var(--line);background:var(--panel);border-radius:12px;padding:10px 6px;text-align:center;cursor:pointer;font:inherit;color:inherit}
+.gen b{display:block;font-size:18px}
+.gen small{font-size:11px;color:var(--sub)}
+.gen.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,var(--panel))}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}}
+.rank li{margin:6px 0;font-size:14px}
+.rank .v{font-weight:700}
+.pill{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--sub);margin-left:4px}
+.note{font-size:12.5px;color:var(--sub)}
+textarea{width:100%;height:220px;font-family:ui-monospace,monospace;font-size:12px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);padding:10px}
+.btn{font:inherit;font-weight:700;border:0;background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:8px;cursor:pointer}
+footer{max-width:1180px;margin:0 auto;padding:20px;color:var(--sub);font-size:12px;border-top:1px solid var(--line)}
+.srclist li{margin:4px 0;font-size:13.5px}
+.rankhead{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.rankhead>div{max-width:760px}
+.xbtn{display:inline-block;background:#000;color:#fff!important;text-decoration:none;font-weight:700;font-size:13px;padding:8px 14px;border-radius:999px;white-space:nowrap}
+.xbtn.sm{padding:4px 10px;font-size:12px}
+ol.ranking{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.rk{display:grid;grid-template-columns:64px 1fr 150px;gap:14px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 18px}
+.rk .no{font-size:30px;font-weight:900;color:var(--sub);text-align:center;line-height:1}
+.rk.top .no{color:var(--accent)}
+.rk .ttl{font-weight:700;font-size:16px;cursor:pointer}
+.rk .ttl:hover{text-decoration:underline}
+.rk .vs{font-size:13px;color:var(--sub);margin-top:3px}
+.rk .vs b{color:var(--ink)}
+.rk .big{font-size:32px;font-weight:900;text-align:right;line-height:1;color:var(--accent)}
+.rk .big small{display:block;font-size:11px;font-weight:500;color:var(--sub);margin-top:4px}
+.rk .meter{display:flex;gap:3px;align-items:flex-end;height:34px;margin-top:8px}
+.rk .meter i{flex:1;border-radius:3px 3px 0 0;min-height:2px;opacity:.75}
+.rk .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+@media(max-width:640px){.rk{grid-template-columns:40px 1fr}.rk .big{grid-column:2;text-align:left}.rk .no{font-size:22px}}
+table.heat td{text-align:center;font-variant-numeric:tabular-nums;border:2px solid transparent;border-bottom:1px solid var(--line)}
+table.heat th{text-align:center}
+table.heat td:first-child{text-align:left}
+table.heat tr.pick td:first-child{font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">GENERATION GAP DATABASE</div>
+  <h1>世代差データベース<br><span style="font-weight:500;font-size:.62em">公的統計で見る「世代によってこんなに違う」</span></h1>
+  <p class="lead">総務省・厚生労働省・内閣府などが公表している年代別の統計を集めて、同じ物差しで比べられるようにしました。各指標に「いちばん高い世代と低い世代の差」を付けているので、差の大きいものから順に見られます。数値はすべて出典の公表資料にもとづいています。</p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="on" data-view="rank">世代差ランキング</button>
+  <button data-view="db">指標から探す</button>
+  <button data-view="gen">世代から探す</button>
+  <button data-view="cohort">生まれ世代を追う</button>
+  <button data-view="data">データ・出典</button>
+</nav>
+
+<main>
+  <!-- DB view -->
+  <section class="view on" id="v-rank">
+    <div class="rankhead">
+      <div>
+        <h2 style="margin:0 0 4px;font-size:24px">世代で差がでかい順ランキング</h2>
+        <p class="note" style="margin:0">「いちばん多い年代 ÷ いちばん少ない年代」が大きいほど上位です。単位がちがう指標どうしでも比べられるよう、倍率で並べています。プラスとマイナスが入れ替わる指標は「逆転」として最上位に置いています。</p>
+      </div>
+      <a class="xbtn" id="shareAll" target="_blank" rel="noopener">𝕏 TOP3をポスト</a>
+    </div>
+    <div class="chips" id="rankCuts" style="margin:14px 0"></div>
+    <ol class="ranking" id="ranking"></ol>
+  </section>
+
+  <section class="view" id="v-db">
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="キーワードで検索（例：テレビ、投票、喫煙、Instagram）">
+      <select id="sort">
+        <option value="gap">世代差（倍率）が大きい順</option>
+        <option value="cat">カテゴリ順</option>
+      </select>
+    </div>
+    <div class="chips" id="cats" style="margin-bottom:14px"></div>
+    <div class="layout">
+      <div class="list" id="list"></div>
+      <div class="card" id="detail"></div>
+    </div>
+  </section>
+
+  <!-- Generation view -->
+  <section class="view" id="v-gen">
+    <p class="note" style="margin-top:0">世代を選ぶと、その年代がほかの年代と比べて「いちばん多い／少ない」指標が一覧になります（10歳きざみで集計されている指標が対象）。世代名は2025年前後の年齢からみたおおよその目安です。</p>
+    <div class="gens" id="gens"></div>
+    <div class="grid2">
+      <div class="card"><h3 style="margin-top:0">この世代が<span style="color:var(--accent)">最も多い</span>指標</h3><ol class="rank" id="topList"></ol></div>
+      <div class="card"><h3 style="margin-top:0">この世代が<span style="color:var(--accent2)">最も少ない</span>指標</h3><ol class="rank" id="botList"></ol></div>
+    </div>
+    <div class="card" style="margin-top:16px"><h3 style="margin-top:0">全指標での位置（全年代平均＝100としたときの値）</h3><div id="genAll"></div></div>
+  </section>
+
+  <!-- Cohort view -->
+  <section class="view" id="v-cohort">
+    <p class="note" style="margin-top:0">同じころに生まれた人たちが、年を重ねるとどう変わったかを追います。たとえば「1967年に20代だった人」は1976年には30代、1986年には40代です。<b>線どうしの上下の差</b>は「生まれた世代による違い」、<b>1本の線の傾き</b>は「年を取ったことによる変化」と読めます。</p>
+    <div class="toolbar">
+      <div class="chips" id="cohortSets"></div>
+      <div class="chips" id="cohortMode" style="margin-left:auto"></div>
+    </div>
+    <div class="card">
+      <div class="cat" id="coCat"></div>
+      <h2 id="coTitle"></h2>
+      <div class="verdict" id="coVerdict"></div>
+      <div id="coChart"></div>
+      <div class="src" id="coSrc"></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">元の表（年×年代）</h3>
+      <p class="note" style="margin-top:0">色が濃いほど値が大きいことを示します。グラフで追っている生まれ世代のマスには、その世代の色で枠を付けています。斜めに並ぶ枠をたどると、同じ世代の変化が見えます。</p>
+      <div class="tablewrap" id="coTable"></div>
+    </div>
+  </section>
+
+  <!-- Data view -->
+  <section class="view" id="v-data">
+    <div class="card">
+      <h3 style="margin-top:0">収録データ（CSV）</h3>
+      <p class="note">全指標を縦持ちのCSVにしています。「コピー」を押すとクリップボードに入るので、表計算ソフトに貼り付けて使えます。</p>
+      <p><button class="btn" id="copyCsv">CSVをコピー</button> <span id="copied" class="note"></span></p>
+      <textarea id="csv" readonly></textarea>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">出典一覧</h3>
+      <ul class="srclist" id="srclist"></ul>
+      <h3>読み方の注意</h3>
+      <ul class="note">
+        <li>年代別の数値は調査ごとに対象年齢・区切り方・調査方法が違います。別の調査どうしの数値を直接比べることはできません。</li>
+        <li>総務省「情報通信メディアの利用時間」の年代別数値は報告書概要の図表から転記したものです。引用する際は原資料で確認してください。</li>
+        <li>投票率は全国から標準的な投票区を抽出して調べた値です（全数調査ではありません）。</li>
+        <li>「世代差（倍率）」は、年代別の最大値÷最小値です。「差」は最大値−最小値です。</li>
+        <li>同じ年齢層でも、時代が変われば中身の世代（生まれ年）は入れ替わります。年代の差がそのまま「生まれ世代の差」とは限りません（加齢による差が含まれます）。</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  世代差データベース ／ 数値は各府省の公表資料から作成。最終更新：2026年11月。
+</footer>
+
+<script>
+const AGES7 = ["10代","20代","30代","40代","50代","60代","70代"];
+const GEN = {
+  "10代":{name:"Z・α世代",born:"2006–2015年頃生まれ",c:"var(--g10)"},
+  "20代":{name:"Z世代",born:"1996–2005年頃生まれ",c:"var(--g20)"},
+  "30代":{name:"ゆとり・ミレニアル世代",born:"1986–1995年頃生まれ",c:"var(--g30)"},
+  "40代":{name:"就職氷河期世代",born:"1976–1985年頃生まれ",c:"var(--g40)"},
+  "50代":{name:"バブル・団塊ジュニア世代",born:"1966–1975年頃生まれ",c:"var(--g50)"},
+  "60代":{name:"新人類・しらけ世代",born:"1956–1965年頃生まれ",c:"var(--g60)"},
+  "70代":{name:"団塊世代ほか",born:"1946–1955年頃生まれ",c:"var(--g70)"}
+};
+
+const SRC = {
+  media:{name:"総務省 情報通信政策研究所「令和7年度 情報通信メディアの利用時間と情報行動に関する調査」概要（2026年6月公表）",url:"https://www.soumu.go.jp/main_content/001079136.pdf",note:"13〜79歳1,800人、2025年12月調査。平日の数値。"},
+  vote:{name:"総務省「第46回〜第50回衆議院議員総選挙 年齢別投票率調」",url:"https://www.soumu.go.jp/main_content/000255968.pdf",note:"全国から抽出した188投票区の男女計。"},
+  vote51:{name:"総務省「国政選挙の年代別投票率の推移について」",url:"https://www.soumu.go.jp/senkyo/senkyo_s/news/sonota/nendaibetu/index.html",note:"第51回衆議院議員総選挙（2026年2月）。ページ本文に記載のある年代のみ。"},
+  well:{name:"内閣府「満足度・生活の質に関する調査報告書2024」",url:"https://www5.cao.go.jp/keizai2/wellbeing/manzoku/000107865.pdf",note:"生活満足度は0〜10点の自己評価の平均。インターネット調査（約1万人）。"},
+  sav:{name:"総務省統計局「家計調査報告（貯蓄・負債編）2025年平均結果の概要（二人以上の世帯）」",url:"https://www.stat.go.jp/data/sav/sokuhou/nen/pdf/2025_gai.pdf",note:"年代は世帯主の年齢。二人以上の世帯の1世帯あたり平均。"},
+  blood:{name:"厚生労働省 献血推進調査会資料「令和6年度 年代別献血率」",url:"https://www.mhlw.go.jp/content/11127000/001515256.pdf",note:"献血率＝献血者数÷その年代の人口。10代は16〜19歳。"},
+  shakai:{name:"総務省統計局「令和3年社会生活基本調査 生活時間及び生活行動に関する結果 結果の概要」",url:"https://www.stat.go.jp/data/shakai/2021/pdf/gaiyoua.pdf",note:"過去1年間（2020年10月〜2021年10月）にその活動をした人の割合。10歳以上。"},
+  health:{name:"厚生労働省「令和5年 国民健康・栄養調査結果の概要」",url:"https://www.mhlw.go.jp/content/10900000/001338334.pdf",note:"20歳以上。年代は20–29歳＝20代のように表示。70代は「70歳以上」。"}
+};
+
+// series: [{name, values}] ; ages: labels ; all: 全体値(任意)
+const DB = [
+ {id:"net-time",cat:"メディア",title:"平日のインターネット利用時間",unit:"分/日",ages:AGES7,series:[{name:"2025年度",values:[228.3,266.9,225.5,229.2,158.0,140.2,93.8]}],all:183.9,src:"media"},
+ {id:"tv-time",cat:"メディア",title:"平日のテレビ（リアルタイム）視聴時間",unit:"分/日",ages:AGES7,series:[{name:"2025年度",values:[43.4,46.3,78.0,112.3,152.7,249.3,313.5]}],all:156.1,src:"media"},
+ {id:"paper-time",cat:"メディア",title:"平日の新聞閲読時間",unit:"分/日",ages:AGES7,series:[{name:"2025年度",values:[0.4,0.2,0.6,3.0,8.0,14.3,27.1]}],all:8.8,src:"media"},
+ {id:"line",cat:"SNS",title:"LINEの利用率",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[96.4,97.7,97.9,96.6,95.6,92.0,77.8]}],all:92.9,src:"media"},
+ {id:"insta",cat:"SNS",title:"Instagramの利用率",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[69.3,82.6,76.6,67.1,54.4,36.1,15.8]}],all:54.8,src:"media"},
+ {id:"x",cat:"SNS",title:"X（旧Twitter）の利用率",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[56.4,73.4,67.7,57.0,40.2,24.8,10.8]}],all:44.7,src:"media"},
+ {id:"tiktok",cat:"SNS",title:"TikTokの利用率",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[67.9,61.5,44.7,42.6,32.2,21.2,11.1]}],all:36.7,src:"media"},
+ {id:"youtube",cat:"SNS",title:"YouTubeの利用率",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[95.0,96.3,94.0,91.6,84.9,72.6,48.5]}],all:81.5,src:"media"},
+ {id:"facebook",cat:"SNS",title:"Facebookの利用率",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[14.3,23.4,37.4,38.9,33.1,22.6,12.5]}],all:27.0,src:"media"},
+ {id:"news-tv",cat:"情報と信頼",title:"信頼できる情報を得るのに最も使うのは「テレビ」",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[52.1,37.2,37.0,40.9,55.9,60.6,63.3]}],all:50.3,src:"media"},
+ {id:"news-net",cat:"情報と信頼",title:"信頼できる情報を得るのに最も使うのは「インターネット」",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[41.4,51.8,51.5,42.6,26.9,20.1,9.4]}],all:32.9,src:"media"},
+ {id:"news-paper",cat:"情報と信頼",title:"信頼できる情報を得るのに最も使うのは「新聞」",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[5.0,7.3,7.7,11.1,14.2,15.7,23.2]}],all:13.0,src:"media"},
+ {id:"trust-tv",cat:"情報と信頼",title:"テレビを信頼できる（全部＋大部分）",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[55.7,48.2,48.5,50.0,58.9,68.6,70.7]}],all:57.9,src:"media"},
+ {id:"trust-paper",cat:"情報と信頼",title:"新聞を信頼できる（全部＋大部分）",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[47.1,47.7,50.6,51.0,64.5,67.2,72.4]}],all:58.8,src:"media"},
+ {id:"trust-net",cat:"情報と信頼",title:"インターネットを信頼できる（全部＋大部分）",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[33.6,28.9,30.2,29.2,23.4,25.5,19.2]}],all:26.3,src:"media"},
+ {id:"trust-mag",cat:"情報と信頼",title:"雑誌を信頼できる（全部＋大部分）",unit:"%",ages:AGES7,series:[{name:"2025年度",values:[15.7,14.7,15.7,14.8,13.3,10.9,7.4]}],all:12.9,src:"media"},
+ {id:"vote2024",cat:"政治参加",title:"衆院選の投票率（5歳きざみ・2012〜2024年）",unit:"%",
+  ages:["18–19","20–24","25–29","30–34","35–39","40–44","45–49","50–54","55–59","60–64","65–69","70–74","75–79","80+"],
+  series:[
+   {name:"2024年 第50回",values:[39.43,30.99,38.19,44.10,47.02,50.90,54.19,57.13,61.55,66.19,69.84,70.47,68.99,48.79]},
+   {name:"2021年 第49回",values:[43.23,33.64,39.34,45.01,48.95,53.55,57.26,60.73,65.62,70.29,72.42,73.27,70.79,48.51]},
+   {name:"2017年 第48回",values:[41.51,30.74,36.90,42.46,46.78,51.91,55.17,61.12,65.51,70.33,73.42,74.16,70.26,46.83]},
+   {name:"2014年 第47回",values:[null,29.72,35.32,39.74,44.15,47.44,52.81,58.12,61.98,66.43,70.11,72.16,67.36,44.89]},
+   {name:"2012年 第46回",values:[null,35.30,40.25,47.07,52.64,56.69,62.47,66.68,69.27,73.17,77.15,76.47,71.02,48.08]}
+  ],all:53.85,allLabel:"2024年の抽出投票区全体",src:"vote"},
+ {id:"vote2026",cat:"政治参加",title:"衆院選の投票率（2026年2月 第51回・若年層）",unit:"%",ages:["10代","20代","30代"],series:[{name:"2026年",values:[43.45,39.01,50.89]}],all:56.26,allLabel:"全年代",src:"vote51",partial:true},
+ {id:"satisfaction",cat:"暮らし・意識",title:"生活満足度（0〜10点）の推移",unit:"点",ages:["39歳以下","40–64歳","65歳以上"],
+  seriesByYear:true,
+  series:[
+   {name:"2019",values:[5.69,5.64,6.53]},{name:"2020",values:[5.73,5.70,6.50]},{name:"2021",values:[5.73,5.44,6.53]},
+   {name:"2022",values:[5.70,5.54,6.50]},{name:"2023",values:[5.77,5.48,6.55]},{name:"2024",values:[5.89,5.57,6.61]}
+  ],mainIdx:5,src:"well"},
+ {id:"smoke-m",cat:"健康・生活習慣",title:"習慣的に喫煙している人の割合（男性）",unit:"%",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[20.6,29.9,33.4,31.5,28.5,16.2]}],all:25.6,src:"health"},
+ {id:"smoke-f",cat:"健康・生活習慣",title:"習慣的に喫煙している人の割合（女性）",unit:"%",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[5.2,8.7,10.1,11.7,7.1,2.3]}],all:6.9,src:"health"},
+ {id:"drink-m",cat:"健康・生活習慣",title:"生活習慣病のリスクを高める量を飲酒している人（男性）",unit:"%",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[4.3,13.4,23.6,18.8,19.3,6.6]}],all:14.1,src:"health"},
+ {id:"drink-f",cat:"健康・生活習慣",title:"生活習慣病のリスクを高める量を飲酒している人（女性）",unit:"%",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[7.8,10.7,13.5,14.6,11.1,3.5]}],all:9.5,src:"health"},
+ {id:"exer-m",cat:"健康・生活習慣",title:"運動習慣のある人の割合（男性）",unit:"%",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[26.5,23.5,30.1,25.6,35.7,46.5]}],all:36.2,src:"health"},
+ {id:"exer-f",cat:"健康・生活習慣",title:"運動習慣のある人の割合（女性）",unit:"%",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[14.5,16.9,17.9,27.4,30.0,36.5]}],all:28.6,src:"health"},
+ {id:"veg-m",cat:"健康・生活習慣",title:"野菜摂取量の平均（男性）",unit:"g/日",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[230.9,243.1,237.7,260.0,272.2,282.2]}],all:262.2,src:"health"},
+ {id:"savings",cat:"お金",title:"貯蓄額（世帯主の年齢別）",unit:"万円",ages:["40歳未満","40代","50代","60代","70歳以上"],series:[{name:"2025年",values:[994,1381,1756,2843,2471]}],all:2059,src:"sav"},
+ {id:"debt",cat:"お金",title:"借金（負債）の額（世帯主の年齢別）",unit:"万円",ages:["40歳未満","40代","50代","60代","70歳以上"],series:[{name:"2025年",values:[1882,1483,743,234,81]}],all:675,src:"sav"},
+ {id:"netsav",cat:"お金",title:"貯蓄から借金を引いた額（世帯主の年齢別）",unit:"万円",ages:["40歳未満","40代","50代","60代","70歳以上"],series:[{name:"2025年",values:[-888,-102,1013,2609,2390]}],all:1384,src:"sav"},
+ {id:"debtrate",cat:"お金",title:"借金がある世帯の割合（世帯主の年齢別）",unit:"%",ages:["40歳未満","40代","50代","60代","70歳以上"],series:[{name:"2025年",values:[64.3,67.0,53.7,26.5,10.4]}],all:37.5,src:"sav"},
+ {id:"hhincome",cat:"お金",title:"世帯の年間収入（世帯主の年齢別）",unit:"万円",ages:["40歳未満","40代","50代","60代","70歳以上"],series:[{name:"2025年",values:[767,871,905,646,442]}],all:681,src:"sav"},
+ {id:"blood",cat:"暮らし・意識",title:"献血率",unit:"%",ages:["10代","20代","30代","40代","50代","60代"],series:[{name:"2024年度",values:[4.7,5.2,5.2,6.4,8.7,5.0]}],all:6.2,src:"blood"},
+ {id:"learn",cat:"暮らし・意識",title:"1年間に学習・自己啓発をした人の割合",unit:"%",ages:["10–14","15–19","20–24","25–29","30–34","35–39","40–44","45–49","50–54","55–59","60–64","65–69","70–74","75+"],series:[{name:"2021年",values:[55.6,52.9,56.5,49.6,47.3,45.4,39.9,38.1,38.8,39.0,36.7,35.3,31.6,23.3]},{name:"2016年",values:[49.7,49.0,52.8,46.0,40.2,38.8,35.1,34.5,37.2,37.1,35.1,33.6,32.0,22.2]}],src:"shakai"},
+ {id:"volunteer",cat:"暮らし・意識",title:"1年間にボランティア活動をした人の割合",unit:"%",ages:["10–14","15–19","20–24","25–29","30–34","35–39","40–44","45–49","50–54","55–59","60–64","65–69","70–74","75+"],series:[{name:"2021年",values:[12.1,13.2,12.2,10.1,12.4,17.7,21.1,20.3,18.8,20.6,21.7,23.4,23.0,16.4]},{name:"2016年",values:[26.5,22.6,19.2,15.3,19.3,27.9,32.2,31.4,29.3,29.2,28.6,29.8,30.0,20.0]}],src:"shakai"},
+ {id:"veg-f",cat:"健康・生活習慣",title:"野菜摂取量の平均（女性）",unit:"g/日",ages:["20代","30代","40代","50代","60代","70代"],series:[{name:"2023年",values:[211.8,219.6,222.0,238.4,262.9,279.6]}],all:250.6,src:"health"}
+];
+
+// ---- helpers ----
+const $ = s=>document.querySelector(s);
+const fmt = (v,u)=> v==null?"—":(Math.abs(v)>=100?v.toFixed(1):(+v).toFixed(u==="点"?2:1)).replace(/\.0$/,"")+(u==="%"?"%":"");
+function main(d){ return d.series[d.mainIdx ?? 0]; }
+function gapInfo(d){
+  const s=main(d), vals=s.values.map((v,i)=>({v,a:d.ages[i]})).filter(x=>x.v!=null);
+  const mx=vals.reduce((a,b)=>b.v>a.v?b:a), mn=vals.reduce((a,b)=>b.v<a.v?b:a);
+  const flip=mn.v<=0&&mx.v>0, ratio=mn.v>0?mx.v/mn.v:Infinity;
+  return {mx,mn,ratio,diff:mx.v-mn.v,flip,score:flip?1000:ratio};
+}
+function ratioLabel(g){ return g.flip?"逆転":(g.ratio>=10?g.ratio.toFixed(0):g.ratio.toFixed(1))+"倍"; }
+const CATS=[...new Set(DB.map(d=>d.cat))];
+let state={cat:"すべて",q:"",sort:"gap",sel:DB[0].id,gen:"20代"};
+try{ const h=location.hash.slice(1); if(h && DB.find(d=>d.id===h)) state.sel=h; }catch(e){}
+
+// ---- header stats ----
+const maxGap = DB.map(d=>({d,g:gapInfo(d)})).filter(x=>isFinite(x.g.ratio)).sort((a,b)=>b.g.ratio-a.g.ratio)[0];
+$("#stats").innerHTML=`<div><b>${DB.length}</b><span>収録指標</span></div><div><b>${Object.keys(SRC).length}</b><span>出典（府省の公表資料）</span></div><div><b>${CATS.length}</b><span>カテゴリ</span></div><div><b>${maxGap.g.ratio.toFixed(0)}倍</b><span>最大の世代差（${maxGap.d.title.replace("平日の","")}）</span></div>`;
+
+// ---- tabs ----
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav.tabs button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.view));
+});
+
+// ---- DB view ----
+function renderCats(){
+  $("#cats").innerHTML=["すべて",...CATS].map(c=>`<button class="chip ${c===state.cat?"on":""}" data-c="${c}">${c}</button>`).join("");
+  document.querySelectorAll("#cats .chip").forEach(b=>b.onclick=()=>{state.cat=b.dataset.c;renderCats();renderList();});
+}
+function filtered(){
+  let r=DB.filter(d=>(state.cat==="すべて"||d.cat===state.cat)&&(!state.q||(d.title+d.cat+SRC[d.src].name).toLowerCase().includes(state.q.toLowerCase())));
+  if(state.sort==="gap") r=[...r].sort((a,b)=>gapInfo(b).score-gapInfo(a).score);
+  else r=[...r].sort((a,b)=>CATS.indexOf(a.cat)-CATS.indexOf(b.cat));
+  return r;
+}
+function renderList(){
+  const r=filtered();
+  const maxR=Math.log(Math.max(...DB.filter(d=>!gapInfo(d).flip).map(d=>gapInfo(d).ratio)));
+  $("#list").innerHTML=r.length?r.map(d=>{const g=gapInfo(d);const rr=g.flip?Math.exp(maxR):g.ratio;
+    return `<button class="item ${d.id===state.sel?"on":""}" data-id="${d.id}"><div class="t">${d.title}</div>
+    <div class="m"><span>${d.cat}</span><span>最大/最小 <b>${ratioLabel(g)}</b></span></div>
+    <div class="gapbar"><i style="width:${Math.max(4,Math.log(rr)/maxR*100)}%"></i></div></button>`}).join(""):`<p class="note">該当する指標がありません。</p>`;
+  document.querySelectorAll("#list .item").forEach(b=>b.onclick=()=>{state.sel=b.dataset.id;try{history.replaceState(null,"","#"+state.sel)}catch(e){};renderList();renderDetail();});
+  if(!r.find(d=>d.id===state.sel) && r[0]){state.sel=r[0].id;renderList();}
+  renderDetail();
+}
+const PAL=["var(--accent)","var(--accent2)","var(--g30)","var(--g50)","var(--g10)","var(--g60)"];
+
+function barChart(d){
+  const s=main(d), n=d.ages.length, W=720, H=320, L=48, R=12, T=20, B=46;
+  const vals=s.values.filter(v=>v!=null); const mx=Math.max(...vals, d.all||0)*1.12; const lo=Math.min(0,...vals)*1.15;
+  const bw=(W-L-R)/n; const y=v=>T+(H-T-B)*(1-(v-lo)/(mx-lo));
+  const g=gapInfo(d);
+  let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${d.title}の年代別グラフ">`;
+  for(let i=0;i<=4;i++){const v=lo+(mx-lo)/4*i;out+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="sub" x="${L-6}" y="${y(v)+4}" font-size="11" text-anchor="end">${Math.abs(v)>=10?Math.round(v):(v===0?"0":v.toFixed(1))}</text>`;}
+  if(lo<0) out+=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--ink)" opacity=".5"/>`;
+  s.values.forEach((v,i)=>{ if(v==null)return; const x=L+bw*i+bw*.15, w=bw*.7;
+    const c = GEN[d.ages[i]]?GEN[d.ages[i]].c:(v===g.mx.v?"var(--accent)":v===g.mn.v?"var(--accent2)":"var(--sub)");
+    const op = (v===g.mx.v||v===g.mn.v)?1:.55;
+    out+=`<rect x="${x}" y="${Math.min(y(v),y(0))}" width="${w}" height="${Math.abs(y(0)-y(v))}" rx="4" fill="${c}" opacity="${op}"><title>${d.ages[i]}：${fmt(v,d.unit)}</title></rect>`;
+    out+=`<text x="${x+w/2}" y="${v<0?y(v)+16:y(v)-6}" font-size="${n>8?10:12}" font-weight="700" text-anchor="middle">${fmt(v,d.unit).replace("%","")}</text>`;
+    out+=`<text class="sub" x="${x+w/2}" y="${H-B+18}" font-size="${n>8?10:12}" text-anchor="middle">${d.ages[i]}</text>`;
+  });
+  if(d.all!=null){out+=`<line x1="${L}" x2="${W-R}" y1="${y(d.all)}" y2="${y(d.all)}" stroke="var(--ink)" stroke-dasharray="5 4" opacity=".6"/><text x="${W-R}" y="${y(d.all)-5}" font-size="11" text-anchor="end">${d.allLabel||"全年代"} ${fmt(d.all,d.unit)}</text>`;}
+  out+=`<text class="sub" x="${L}" y="${H-6}" font-size="11">単位：${d.unit}</text></svg>`;
+  return out;
+}
+function lineChart(d){
+  const n=d.ages.length, W=720, H=340, L=48, R=16, T=20, B=46;
+  const all=d.series.flatMap(s=>s.values).filter(v=>v!=null);
+  let mn=Math.min(...all), mx=Math.max(...all); const pad=(mx-mn)*.12; mn=Math.max(0,mn-pad); mx=mx+pad;
+  const x=i=>L+(W-L-R)*(n===1?.5:i/(n-1)), y=v=>T+(H-T-B)*(1-(v-mn)/(mx-mn));
+  let out=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${d.title}">`;
+  for(let i=0;i<=4;i++){const v=mn+(mx-mn)/4*i;out+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="sub" x="${L-6}" y="${y(v)+4}" font-size="11" text-anchor="end">${d.unit==="点"?v.toFixed(1):Math.round(v)}</text>`;}
+  d.ages.forEach((a,i)=>out+=`<text class="sub" x="${x(i)}" y="${H-B+18}" font-size="${n>8?10:12}" text-anchor="middle">${a}</text>`);
+  d.series.forEach((s,si)=>{const c=PAL[si%PAL.length]; const main0=si===(d.mainIdx??0);
+    const pts=s.values.map((v,i)=>v==null?null:[x(i),y(v)]);
+    let path="";pts.forEach((p,i)=>{if(!p)return;path+=(path&&pts[i-1]?"L":"M")+p[0]+","+p[1];});
+    out+=`<path d="${path}" fill="none" stroke="${c}" stroke-width="${main0?3.2:1.6}" opacity="${main0?1:.75}"/>`;
+    pts.forEach((p,i)=>{if(p)out+=`<circle cx="${p[0]}" cy="${p[1]}" r="${main0?4:2.5}" fill="${c}"><title>${s.name}・${d.ages[i]}：${fmt(s.values[i],d.unit)}</title></circle>`;});
+  });
+  out+=`<text class="sub" x="${L}" y="${H-6}" font-size="11">単位：${d.unit}</text></svg>`;
+  out+=`<div class="legend">${d.series.map((s,si)=>`<span style="--c:${PAL[si%PAL.length]}">${s.name}</span>`).join("")}</div>`;
+  return out;
+}
+function yearChart(d){ // satisfaction: x = years, lines = age groups
+  const t={...d, ages:d.series.map(s=>s.name), series:d.ages.map((a,ai)=>({name:a,values:d.series.map(s=>s.values[ai])})), mainIdx:-1};
+  return lineChart(t);
+}
+function renderDetail(){
+  const d=DB.find(x=>x.id===state.sel); if(!d)return; const g=gapInfo(d); const s=SRC[d.src];
+  const ratioTxt=isFinite(g.ratio)?(g.ratio>=10?g.ratio.toFixed(0):g.ratio.toFixed(1)):"—";
+  let chart = d.seriesByYear? yearChart(d) : (d.series.length>1? lineChart(d) : barChart(d));
+  const tableHead = d.seriesByYear? `<tr><th>年</th>${d.ages.map(a=>`<th>${a}</th>`).join("")}</tr>` : `<tr><th></th>${d.ages.map(a=>`<th>${a}</th>`).join("")}${d.all!=null?"<th>全体</th>":""}</tr>`;
+  const tableBody = d.series.map(se=>`<tr><td>${se.name}</td>${se.values.map(v=>`<td>${fmt(v,d.unit)}</td>`).join("")}${(!d.seriesByYear&&d.all!=null)?`<td>${se===main(d)?fmt(d.all,d.unit):""}</td>`:""}</tr>`).join("");
+  const mainLabel = main(d).name;
+  $("#detail").innerHTML=`<div class="cat">${d.cat}</div><h2>${d.title}</h2>
+  <div class="verdict">${mainLabel?mainLabel+"の値で、":""}最も高いのは<b>${g.mx.a}（${unitTxt(g.mx.v,d.unit)}）</b>、最も低いのは<b style="color:var(--accent2)">${g.mn.a}（${unitTxt(g.mn.v,d.unit)}）</b>。${g.flip?`<b>プラスとマイナスが逆転</b>しています。`:""}その差は<b>${fmt(+g.diff.toFixed(2),d.unit==="%"?"pt":d.unit).replace("pt","")}${d.unit==="%"?"ポイント":d.unit==="点"?"点":d.unit}</b>${g.flip?"":`、<b>${ratioTxt}倍</b>`}です。${d.partial?"<br><span class='note'>※公表ページ本文に数値がある10〜30代のみ収録。</span>":""}</div>
+  ${chart}
+  <div class="tablewrap"><table><thead>${tableHead}</thead><tbody>${tableBody}</tbody></table></div>
+  <div class="src">出典：<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a><br>${s.note}</div>`;
+}
+$("#q").oninput=e=>{state.q=e.target.value;renderList();};
+$("#sort").onchange=e=>{state.sort=e.target.value;renderList();};
+
+// ---- Generation view ----
+function decadeVal(d,gen){ const i=d.ages.indexOf(gen); if(i<0) return null; return main(d).values[i]; }
+const decadeDB = DB.filter(d=>!d.seriesByYear && d.series.length===1 && d.ages.some(a=>GEN[a]) && !d.partial);
+function renderGen(){
+  $("#gens").innerHTML=AGES7.map(a=>`<button class="gen ${a===state.gen?"on":""}" style="--c:${GEN[a].c}" data-g="${a}"><b>${a}</b><small>${GEN[a].name}</small></button>`).join("");
+  document.querySelectorAll(".gen").forEach(b=>b.onclick=()=>{state.gen=b.dataset.g;renderGen();});
+  const G=state.gen, tops=[], bots=[], rows=[];
+  decadeDB.forEach(d=>{ const v=decadeVal(d,G); if(v==null) return; const g=gapInfo(d);
+    if(g.mx.a===G) tops.push({d,v}); if(g.mn.a===G) bots.push({d,v});
+    if(d.all && main(d).values.every(x=>x==null||x>0)) rows.push({d,v,idx:v/d.all*100});
+  });
+  const li=(arr)=>arr.length?arr.map(({d,v})=>`<li><a href="#${d.id}" data-jump="${d.id}">${d.title}</a> <span class="v">${fmt(v,d.unit)}${d.unit!=="%"?" "+d.unit:""}</span><span class="pill">${d.cat}</span></li>`).join(""):`<li class="note">該当なし（10歳きざみの指標の中では、最多・最少になる項目がありません）</li>`;
+  $("#topList").innerHTML=`<p class="note" style="margin:0 0 6px">${GEN[G].born}</p>`+li(tops);
+  $("#botList").innerHTML=li(bots);
+  rows.sort((a,b)=>b.idx-a.idx);
+  const W=720,rowH=24,L=330,H=rows.length*rowH+30; const maxI=Math.max(...rows.map(r=>r.idx),200); const sx=v=>L+(W-L-50)*Math.min(v,maxI)/maxI;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+  svg+=`<line x1="${sx(100)}" x2="${sx(100)}" y1="0" y2="${H-20}" stroke="var(--ink)" stroke-dasharray="4 3" opacity=".5"/><text x="${sx(100)}" y="${H-6}" font-size="11" text-anchor="middle" class="sub">全年代＝100</text>`;
+  rows.forEach((r,i)=>{const yy=i*rowH+4; const c=r.idx>=100?"var(--accent)":"var(--accent2)";
+    svg+=`<text x="${L-8}" y="${yy+15}" font-size="11.5" text-anchor="end">${r.d.title.length>24?r.d.title.slice(0,24)+"…":r.d.title}</text>`;
+    const x0=Math.min(sx(100),sx(r.idx)), w=Math.abs(sx(r.idx)-sx(100));
+    svg+=`<rect x="${x0}" y="${yy+3}" width="${Math.max(w,1)}" height="15" rx="3" fill="${c}" opacity=".85"><title>${r.d.title}：${fmt(r.v,r.d.unit)}（全年代 ${fmt(r.d.all,r.d.unit)}）</title></rect>`;
+    const lx=r.idx>=100?x0+w+4:Math.max(x0-4,L+22); svg+=`<text x="${lx}" y="${yy+15}" font-size="11" text-anchor="${r.idx>=100?"start":"end"}" font-weight="700">${r.idx>=maxI?"≥":""}${Math.round(r.idx)}</text>`;
+  });
+  svg+="</svg>";
+  $("#genAll").innerHTML=svg+`<p class="note">全年代の値がある指標のみ。200を超える値は右端で切っています。</p>`;
+  document.querySelectorAll("[data-jump]").forEach(a=>a.onclick=e=>{e.preventDefault();state.sel=a.dataset.jump;state.cat="すべて";state.q="";$("#q").value="";document.querySelector('nav.tabs button[data-view="db"]').click();renderCats();renderList();window.scrollTo({top:0,behavior:"smooth"});});
+}
+
+// ---- Data view ----
+function buildCsv(){
+  const lines=["指標ID,カテゴリ,指標,系列,年代,値,単位,出典,出典URL"];
+  DB.forEach(d=>d.series.forEach(s=>s.values.forEach((v,i)=>{ if(v==null)return;
+    lines.push([d.id,d.cat,d.title,s.name,d.ages[i],v,d.unit,SRC[d.src].name,SRC[d.src].url].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(","));})));
+  return lines.join("\n");
+}
+$("#csv").value=buildCsv();
+$("#copyCsv").onclick=async()=>{try{await navigator.clipboard.writeText($("#csv").value);$("#copied").textContent="コピーしました";}catch(e){$("#csv").select();$("#copied").textContent="自動コピーできませんでした。テキストを選択したので Ctrl+C でコピーしてください";}};
+$("#srclist").innerHTML=Object.values(SRC).map(s=>`<li><a href="${s.url}" target="_blank" rel="noopener">${s.name}</a><br><span class="note">${s.note}</span></li>`).join("");
+
+// ---- Cohort view ----
+SRC.voteLong={name:"総務省「衆議院議員総選挙における年代別投票率の推移」",url:"https://www.soumu.go.jp/main_content/000255967.pdf",note:"全国から抽出した投票区の値。第31回（1967年）の60代は60〜70歳、70代以上は71歳以上。"};
+SRC.alcohol={name:"厚生労働省「アルコール情報ページ 飲酒習慣者の年次推移（性・年齢階級別）」",url:"https://www.mhlw.go.jp/topics/bukyoku/kenkou/alcohol/siryo/insyu.html",note:"飲酒習慣者＝週3日以上、清酒換算で1日1合以上飲む人。平成15年（2003年）以降は調査手法が変わったため、それ以前と単純比較はできない。"};
+const CO_AGES6=["20代","30代","40代","50代","60代","70代以上"];
+const COHORT={
+ vote:{label:"衆院選の投票率",cat:"政治参加",title:"衆院選の投票率を、生まれ世代ごとに追う（1967〜2024年）",unit:"%",ages:CO_AGES6,src:"voteLong",
+  picks:[1967,1976,1986,1996,2005,2014,2024],
+  rows:[
+   [1967,"第31回",[66.69,77.88,82.07,82.68,77.08,56.83]],[1969,"第32回",[59.61,71.19,78.33,80.23,77.70,62.52]],
+   [1972,"第33回",[61.89,75.48,81.84,83.38,82.34,68.01]],[1976,"第34回",[63.50,77.41,82.29,84.57,84.13,71.35]],
+   [1979,"第35回",[57.83,71.06,77.82,80.82,80.97,67.72]],[1980,"第36回",[63.13,75.92,81.88,85.23,84.84,69.66]],
+   [1983,"第37回",[54.07,68.25,75.43,80.51,82.43,68.41]],[1986,"第38回",[56.86,72.15,77.99,82.74,85.66,72.36]],
+   [1990,"第39回",[57.76,75.97,81.44,84.85,87.21,73.21]],[1993,"第40回",[47.46,68.46,74.48,79.34,83.38,71.61]],
+   [1996,"第41回",[36.42,57.49,65.46,70.61,77.25,66.88]],[2000,"第42回",[38.35,56.82,68.13,71.98,79.23,69.28]],
+   [2003,"第43回",[35.62,50.72,64.72,70.01,77.89,67.78]],[2005,"第44回",[46.20,59.79,71.94,77.86,83.08,69.48]],
+   [2009,"第45回",[49.45,63.87,72.63,79.69,84.15,71.06]],[2012,"第46回",[37.89,50.10,59.38,68.02,74.93,63.30]],
+   [2014,"第47回",[32.58,42.09,49.98,60.07,68.28,59.46]],[2017,"第48回",[33.85,44.75,53.52,63.32,72.04,60.94]],
+   [2021,"第49回",[36.50,47.13,55.56,62.96,71.38,61.90]],[2024,"第50回",[34.62,45.66,52.66,59.16,68.02,60.42]],
+   [2026,"第51回",[39.01,50.89,56.16,61.90,70.24,59.33]]
+  ],
+  note:"衆院選はほぼ3〜4年おきなので、間隔が約10年になる7回（1967・1976・1986・1996・2005・2014・2024年）を選んで世代をつないでいます。選挙ごとの盛り上がり（2005年の郵政選挙は高く、2014年は低い）が全世代に効く点に注意してください。「70代以上」は幅が広いため、最後の点は複数の世代が混ざります。"},
+ drinkM:{label:"飲酒習慣（男性）",cat:"健康・生活習慣",title:"毎日のように飲む男性の割合を、生まれ世代ごとに追う（1989→1999年）",unit:"%",ages:CO_AGES6,src:"alcohol",picks:[1989,1999],
+  rows:[[1989,"平成元年",[32.5,55.5,62.5,58.2,47.9,37]],[1990,"平成2年",[31.4,55.4,60.7,59.1,55.1,37.5]],[1991,"平成3年",[25.6,51.2,58.4,55.2,50.1,39.9]],[1992,"平成4年",[26.3,52.7,57.1,60.1,54.7,37.4]],[1993,"平成5年",[25.8,47.8,52.7,53.8,49.1,39.3]],[1994,"平成6年",[24.8,41.9,49.7,53.1,48.7,35.8]],[1995,"平成7年",[34.9,59.2,64.6,62.5,53.9,41]],[1996,"平成8年",[36.2,54.6,63.3,62.2,53.8,36.7]],[1997,"平成9年",[30.7,54.8,60.8,61.2,51.3,42.2]],[1998,"平成10年",[30.1,53.1,61.6,62.6,53.7,42.6]],[1999,"平成11年",[34,48.8,60.6,64.3,55.2,44.1]],[2000,"平成12年",[27.8,53.3,55.8,61.5,56.9,38.4]],[2001,"平成13年",[35.7,49.9,61.3,62.8,55.1,45.4]],[2002,"平成14年",[23.8,42.3,57.9,60.7,50.9,44.1]]],
+  note:"公表されている推移表は1989〜2005年（2003年以降は手法変更）なので、10年おきに追えるのは1989年→1999年の1区間だけです。単年の値はぶれが大きいので、元の表で前後の年も見てください。"},
+ drinkF:{label:"飲酒習慣（女性）",cat:"健康・生活習慣",title:"毎日のように飲む女性の割合を、生まれ世代ごとに追う（1989→1999年）",unit:"%",ages:CO_AGES6,src:"alcohol",picks:[1989,1999],
+  rows:[[1989,"平成元年",[4.1,8,8.8,6.5,4.4,3.4]],[1990,"平成2年",[3.8,8.7,8.9,6.3,4.8,1.1]],[1991,"平成3年",[4.2,7.7,10.1,6.2,5,2.8]],[1992,"平成4年",[5.4,8.2,10.5,7.1,4,2.3]],[1993,"平成5年",[3.4,7.1,9.9,6.8,3.2,1.7]],[1994,"平成6年",[4.3,9.3,8.4,6.5,3.5,2.5]],[1995,"平成7年",[6.1,8.9,10,7.6,6,4.4]],[1996,"平成8年",[7.5,12.1,9.9,8.4,5.3,1.9]],[1997,"平成9年",[9,12,12.6,10.5,4.8,3.3]],[1998,"平成10年",[8.5,12.7,12.5,11.9,6.6,3.5]],[1999,"平成11年",[6.6,11.9,10.2,10.7,5.2,4.1]],[2000,"平成12年",[8.4,14.1,11.5,9.8,7.3,3.3]],[2001,"平成13年",[9.3,12.6,13.8,9.7,7.6,2.7]],[2002,"平成14年",[8.1,9.4,14.3,12.3,5.6,2.9]]],
+  note:"公表されている推移表は1989〜2005年（2003年以降は手法変更）なので、10年おきに追えるのは1989年→1999年の1区間だけです。単年の値はぶれが大きいので、元の表で前後の年も見てください。"}
+};
+const CO_PAL=["#d1495b","#e07a26","#e0a526","#9bb53a","#3a9d7a","#2e86ab","#7b5ea7"];
+let coState={set:"vote",mode:"cohort"};
+function cohorts(c){ // each pick k: cohort that was 20代 at picks[k]; stage j uses picks[k+j]
+  const byY=Object.fromEntries(c.rows.map(r=>[r[0],r]));
+  return c.picks.map((y0,k)=>{const pts=[];for(let j=0;k+j<c.picks.length&&j<c.ages.length;j++){const y=c.picks[k+j];pts.push({j,y,v:byY[y][2][j]});}
+    return {k,y0,born:`${y0-29}〜${y0-20}年ごろ生まれ`,name:`${y0}年に20代`,pts,c:CO_PAL[k%CO_PAL.length]};});
+}
+function coChart(c){
+  const W=760,H=360,L=48,R=150,T=20,B=46;
+  const co=cohorts(c), mode=coState.mode;
+  let lines, xs;
+  if(mode==="cohort"){ xs=c.ages; lines=co.map(o=>({name:o.name,sub:o.born,c:o.c,pts:o.pts.map(p=>({x:p.j,v:p.v,tip:`${p.y}年・${c.ages[p.j]}`}))})); }
+  else { xs=c.picks.map(String); lines=c.ages.map((a,ai)=>({name:a,sub:"同じ年代の時代変化",c:CO_PAL[ai%CO_PAL.length],pts:c.picks.map((y,xi)=>({x:xi,v:c.rows.find(r=>r[0]===y)[2][ai],tip:`${y}年・${a}`}))})); }
+  const all=lines.flatMap(l=>l.pts.map(p=>p.v)); let mn=Math.min(...all),mx=Math.max(...all); const pad=(mx-mn)*.1; mn=Math.max(0,mn-pad); mx+=pad;
+  const n=xs.length, x=i=>L+(W-L-R)*(n===1?.5:i/(n-1)), y=v=>T+(H-T-B)*(1-(v-mn)/(mx-mn));
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${c.title}">`;
+  for(let i=0;i<=4;i++){const v=mn+(mx-mn)/4*i;s+=`<line class="axis" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="sub" x="${L-6}" y="${y(v)+4}" font-size="11" text-anchor="end">${Math.round(v)}</text>`;}
+  xs.forEach((a,i)=>s+=`<text class="sub" x="${x(i)}" y="${H-B+18}" font-size="12" text-anchor="middle">${a}</text>`);
+  const ends=[];
+  lines.forEach(l=>{let d="";l.pts.forEach((p,i)=>d+=(i?"L":"M")+x(p.x)+","+y(p.v));
+    s+=`<path d="${d}" fill="none" stroke="${l.c}" stroke-width="2.6"/>`;
+    l.pts.forEach(p=>s+=`<circle cx="${x(p.x)}" cy="${y(p.v)}" r="4" fill="${l.c}"><title>${l.name}（${l.sub}）\n${p.tip}：${p.v}${c.unit}</title></circle>`);
+    const last=l.pts[l.pts.length-1]; ends.push({l,ty:y(last.v),lx:x(last.x)});
+  });
+  // end labels on right, de-overlapped
+  ends.sort((a,b)=>a.ty-b.ty); let prev=-99; ends.forEach(e=>{e.y2=Math.max(e.ty,prev+15);prev=e.y2;});
+  ends.forEach(e=>{s+=`<line x1="${e.lx+5}" y1="${e.ty}" x2="${W-R+8}" y2="${e.y2}" stroke="${e.l.c}" opacity=".5"/><text x="${W-R+12}" y="${e.y2+4}" font-size="11.5" fill="${e.l.c}" style="fill:${e.l.c}" font-weight="700">${e.l.name}</text>`;});
+  s+=`<text class="sub" x="${L}" y="${H-6}" font-size="11">単位：${c.unit}　横軸：${mode==="cohort"?"その世代の年齢":"調査年"}</text></svg>`;
+  if(mode==="cohort") s+=`<div class="legend">${co.map(o=>`<span style="--c:${o.c}">${o.name}＝${o.born}</span>`).join("")}</div>`;
+  return s;
+}
+function coVerdict(c){
+  const co=cohorts(c);
+  if(coState.set==="vote"){
+    const a=co[0], d=co[3]; const a40=a.pts[2], d40=d.pts[2];
+    const t20=co.map(o=>o.pts[0]);
+    return `20代のときの投票率は、<b>1967年に20代だった世代（${co[0].born}）が${t20[0].v}%</b>、<b style="color:var(--accent2)">2014年に20代だった世代（${co[5].born}）が${t20[5].v}%</b>。40代になった時点でも、${a.born}の世代は${a40.v}%（${a40.y}年）、${d.born}の世代は${d40.v}%（${d40.y}年）で、<b>${(a40.v-d40.v).toFixed(1)}ポイント</b>の差が残っています。どの世代も年を取ると投票率が上がりますが、後に生まれた世代ほど線全体が下にあります。`;
+  }
+  const o=co[0], j1=o.pts[1]; const same=c.rows.find(r=>r[0]===1989)[2][1];
+  return `1989年に20代だった世代（${o.born}）は、1999年に30代になって${j1.v}%。10年前（1989年）の30代は${same}%でした。同じ30代でも、${j1.v>same?"後の世代の方が高い":"後の世代の方が低い"}ことになります。`;
+}
+function coTable(c){
+  const co=cohorts(c); const mark={}; co.forEach(o=>o.pts.forEach(p=>mark[p.y+"-"+p.j]=o.c));
+  const vals=c.rows.flatMap(r=>r[2]); const mn=Math.min(...vals),mx=Math.max(...vals);
+  let h=`<table class="heat"><thead><tr><th>年</th>${c.ages.map(a=>`<th>${a}</th>`).join("")}</tr></thead><tbody>`;
+  c.rows.forEach(r=>{const pick=c.picks.includes(r[0]);
+    h+=`<tr class="${pick?"pick":""}"><td>${r[0]}年 ${r[1]}</td>${r[2].map((v,j)=>{const t=(v-mn)/(mx-mn); const m=mark[r[0]+"-"+j];
+      return `<td style="background:color-mix(in srgb,var(--accent2) ${Math.round(8+t*55)}%,var(--panel));${m?`border-color:${m};font-weight:700`:""}">${v}</td>`}).join("")}</tr>`;});
+  return h+"</tbody></table>";
+}
+function renderCohort(){
+  const c=COHORT[coState.set];
+  $("#cohortSets").innerHTML=Object.entries(COHORT).map(([k,v])=>`<button class="chip ${k===coState.set?"on":""}" data-k="${k}">${v.label}</button>`).join("");
+  $("#cohortMode").innerHTML=[["cohort","生まれ世代で比べる"],["year","同じ年代を時代で比べる"]].map(([k,v])=>`<button class="chip ${k===coState.mode?"on":""}" data-m="${k}">${v}</button>`).join("");
+  document.querySelectorAll("#cohortSets .chip").forEach(b=>b.onclick=()=>{coState.set=b.dataset.k;renderCohort();});
+  document.querySelectorAll("#cohortMode .chip").forEach(b=>b.onclick=()=>{coState.mode=b.dataset.m;renderCohort();});
+  $("#coCat").textContent=c.cat; $("#coTitle").textContent=c.title;
+  $("#coVerdict").innerHTML=coVerdict(c);
+  $("#coChart").innerHTML=coChart(c);
+  const s=SRC[c.src]; $("#coSrc").innerHTML=`出典：<a href="${s.url}" target="_blank" rel="noopener">${s.name}</a><br>${s.note}<br>${c.note}`;
+  $("#coTable").innerHTML=coTable(c);
+}
+// add cohort data to CSV and source list
+(function(){
+  const extra=[]; Object.entries(COHORT).forEach(([k,c])=>c.rows.forEach(r=>r[2].forEach((v,j)=>extra.push([ "cohort-"+k,c.cat,c.label+"（推移）",r[0]+"年 "+r[1],c.ages[j],v,c.unit,SRC[c.src].name,SRC[c.src].url].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(",")))));
+  $("#csv").value+= "\n"+extra.join("\n");
+  $("#stats").querySelectorAll("b")[1].textContent=Object.keys(SRC).length;
+  $("#srclist").innerHTML=Object.values(SRC).map(s=>`<li><a href="${s.url}" target="_blank" rel="noopener">${s.name}</a><br><span class="note">${s.note}</span></li>`).join("");
+})();
+
+// ---- Ranking view ----
+const youngIdx=(d,g)=>d.ages.indexOf(g.mx.a)<d.ages.indexOf(g.mn.a);
+const CUTS=[
+ {k:"all",label:"総合（倍率順）",f:()=>true,sort:"score"},
+ {k:"young",label:"若い世代ほど多い",f:(d,g)=>youngIdx(d,g),sort:"score"},
+ {k:"old",label:"年上ほど多い",f:(d,g)=>!youngIdx(d,g),sort:"score"},
+ {k:"money",label:"お金の世代差",f:d=>d.cat==="お金",sort:"score"},
+ {k:"pt",label:"％の差（ポイント）が大きい順",f:d=>d.unit==="%",sort:"diff"}
+];
+let rankCut="all";
+const RANKABLE=DB.filter(d=>!d.partial && !d.seriesByYear);
+function unitTxt(v,u){ return fmt(v,u)+(u==="%"?"":u); }
+function shareText(i,d,g){
+  const head=`【世代差ランキング${i?` 第${i}位`:""}】${d.title}`;
+  const body=g.flip?`${g.mn.a}は${unitTxt(g.mn.v,d.unit)}、${g.mx.a}は${unitTxt(g.mx.v,d.unit)}。プラスとマイナスが逆転`:`${g.mx.a} ${unitTxt(g.mx.v,d.unit)} vs ${g.mn.a} ${unitTxt(g.mn.v,d.unit)}＝${ratioLabel(g)}`;
+  return `${head}\n${body}\n出典：${SRC[d.src].name.split("「")[0]}\n#世代差 #世代差データベース`;
+}
+const xURL=t=>"https://twitter.com/intent/tweet?text="+encodeURIComponent(t);
+function renderRank(){
+  $("#rankCuts").innerHTML=CUTS.map(c=>`<button class="chip ${c.k===rankCut?"on":""}" data-k="${c.k}">${c.label}</button>`).join("");
+  document.querySelectorAll("#rankCuts .chip").forEach(b=>b.onclick=()=>{rankCut=b.dataset.k;renderRank();});
+  const cut=CUTS.find(c=>c.k===rankCut);
+  const list=RANKABLE.map(d=>({d,g:gapInfo(d)})).filter(x=>cut.f(x.d,x.g)).sort((a,b)=>cut.sort==="diff"?b.g.diff-a.g.diff:b.g.score-a.g.score);
+  $("#ranking").innerHTML=list.map(({d,g},i)=>{
+    const vals=main(d).values; const mxAbs=Math.max(...vals.filter(v=>v!=null).map(Math.abs));
+    const meter=vals.map((v,j)=>v==null?"<i style='height:2px'></i>":`<i title="${d.ages[j]}：${unitTxt(v,d.unit)}" style="height:${Math.max(4,Math.abs(v)/mxAbs*100)}%;background:${d.ages[j]===g.mx.a?"var(--accent)":d.ages[j]===g.mn.a?"var(--accent2)":(v<0?"var(--sub)":"var(--line)")};${v<0?"opacity:.45":""}"></i>`).join("");
+    const big=cut.sort==="diff"?`${g.diff.toFixed(1)}<small>ポイント差（${ratioLabel(g)}）</small>`:(g.flip?`逆転<small>差 ${Math.round(g.diff)}${d.unit}</small>`:`${ratioLabel(g)}<small>${d.unit==="%"?g.diff.toFixed(1)+"ポイント差":"差 "+unitTxt(+g.diff.toFixed(1),d.unit)}</small>`);
+    return `<li class="rk ${i<3?"top":""}"><div class="no">${i+1}</div>
+      <div><div class="ttl" data-jump="${d.id}">${d.title}</div>
+        <div class="vs">いちばん多い <b style="color:var(--accent)">${g.mx.a}：${unitTxt(g.mx.v,d.unit)}</b>　／　いちばん少ない <b style="color:var(--accent2)">${g.mn.a}：${unitTxt(g.mn.v,d.unit)}</b></div>
+        <div class="meter">${meter}</div>
+        <div class="foot"><span class="pill">${d.cat}</span><a class="xbtn sm" target="_blank" rel="noopener" href="${xURL(shareText(i+1,d,g))}">𝕏 ポスト</a></div>
+      </div>
+      <div class="big">${big}</div></li>`;}).join("");
+  const top=list.slice(0,3).map(({d,g},i)=>`${i+1}位 ${d.title}（${g.flip?"逆転":ratioLabel(g)}）`).join("\n");
+  $("#shareAll").href=xURL(`【世代で差がでかい順ランキング：${cut.label}】\n${top}\n#世代差 #世代差データベース`);
+  document.querySelectorAll("#ranking [data-jump]").forEach(a=>a.onclick=()=>{state.sel=a.dataset.jump;state.cat="すべて";state.q="";$("#q").value="";document.querySelector('nav.tabs button[data-view="db"]').click();renderCats();renderList();window.scrollTo({top:0,behavior:"smooth"});});
+}
+
+renderCats(); renderList(); renderGen(); renderCohort(); renderRank();
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1); if(DB.find(d=>d.id===h)){state.sel=h;renderList();}});
+</script>
+</body>
+</html>
